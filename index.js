@@ -47,13 +47,13 @@ function renderProduct() {
 						<img src="./img/${product.img}" alt="${product.name}" />
 						<p class="product-price">
 							<strong>Price:</strong>
-							<span class="new-price">${product.newPrice} zł</span>
+							<span class="new-price">${Math.round(product.newPrice)} zł</span>
 						</p>
 						${
 							product.price !== product.newPrice
 								? `<p class="product-old-price">
 						<strong>Old price:</strong>
-						<span class="old-price">${product.price} zł</span>
+						<span class="old-price">${Math.round(product.price)} zł</span>
 					</p>`
 								: ''
 						}
@@ -87,5 +87,54 @@ setTimeout(() => {
 }, 2000)
 
 function performSearch() {
-	const searchQuery = searchInput.ariaValueMax.toLocaleLowerCase()
+	const searchQuery = searchInput.value.toLowerCase()
+
+	if (!searchQuery.trim()) {
+		renderProduct()
+		return
+	}
+
+	const filteredProducts = discountedProducts.filter(
+		product =>
+			product.name.toLowerCase().includes(searchQuery) ||
+			product.brand.toLowerCase().includes(searchQuery) ||
+			product.description.toLowerCase().includes(searchQuery)
+	)
+
+	renderFilteredProducts(filteredProducts)
 }
+
+function renderFilteredProducts(products) {
+	const productsHTML = products.map(product => {
+		return `
+		<div class="product">
+						<h2>${product.name}</h2>
+						<p><strong>Brand:</strong> ${product.brand}</p>
+						<img src="./img/${product.img}" alt="${product.name}" />
+						<p class="product-price">
+							<strong>Price:</strong>
+							<span class="new-price">${Math.round(product.newPrice)} zł</span>
+						</p>
+						${
+							product.price !== product.newPrice
+								? `<p class="product-old-price">
+						<strong>Old price:</strong>
+						<span class="old-price">${Math.round(product.price)} zł</span>
+					</p>`
+								: ''
+						}
+						<p><strong>Color:</strong> ${product.color}</p>
+						<p class="product-description">
+							<strong>Description:</strong> ${product.description}
+						</p>
+						${product.size ? `<p class="product-size"><strong>Size:</strong> M</p>` : ''}
+						<p class="product-weight"><strong>Weight:</strong> ${product.weight} kg</p>
+					</div>`
+	})
+
+	productsContainer.innerHTML = productsHTML.join('')
+}
+
+// Додаємо обробники подій для пошуку
+searchInput.addEventListener('input', performSearch)
+searchBtn.addEventListener('click', performSearch)
