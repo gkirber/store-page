@@ -153,3 +153,26 @@ img {
 	color: red;
 	font-size: 24px;
 }
+
+/* Out of stock product styles */
+.out-of-stock {
+	color: #e74c3c;
+	font-size: 18px;
+	font-weight: bold;
+	text-align: center;
+	padding: 8px;
+	background-color: #fdf2f2;
+	border: 2px solid #e74c3c;
+	border-radius: 4px;
+	margin: 10px 0;
+}
+
+/* Product card styles for out of stock items */
+.product.out-of-stock-item {
+	opacity: 0.8;
+	border-color: #e74c3c;
+}
+
+.product.out-of-stock-item:hover {
+	opacity: 1;
+}

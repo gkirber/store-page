@@ -11,7 +11,12 @@ const data2 = JSON.parse(products2)
 
 const allProducts = data1.concat(data2)
 
-const sortedProducts = allProducts.sort((a, b) => {
+const productsWithOrderedIds = allProducts.map((product, index) => ({
+	...product,
+	id: index + 1,
+}))
+
+const sortedProducts = productsWithOrderedIds.sort((a, b) => {
 	if (a.type === 'accessories' && b.type === 'bicycles') return 1
 	if (a.type === 'bicycles' && b.type === 'accessories') return -1
 	return 0
@@ -45,32 +50,50 @@ function renderProducts(discountedProducts) {
 	}
 
 	const productsHTML = discountedProducts
-		.map(product => {
-			return `
-		<div class="product">
-						<h2>${product.name}</h2>
-						<p><strong>Brand:</strong> ${product.brand}</p>
-						<img src="./img/${product.img}" alt="${product.name}" />
+		.map(
+			({
+				id,
+				name,
+				brand,
+				img,
+				price,
+				newPrice,
+				color,
+				description,
+				size,
+				weight,
+				quantity,
+			}) => {
+				const isOutOfStock = quantity === 0
+				const hasDiscount = price !== newPrice
+
+				return `
+		<div class="product${isOutOfStock ? ' out-of-stock-item' : ''}">
+						<h2>${name}</h2>
+						<p><strong>Brand:</strong> ${brand}</p>
+						<img src="./img/${img}" alt="${name}" />
+						${isOutOfStock ? '<p class="out-of-stock"><strong>Out of stock</strong></p>' : ''}
 						<p class="product-price">
 							<strong>Price:</strong>
-							<span class="new-price">${Math.round(product.newPrice)} zł</span>
+							<span class="new-price">${Math.round(newPrice)} zł</span>
 						</p>
 						${
-							product.price !== product.newPrice
+							hasDiscount && !isOutOfStock
 								? `<p class="product-old-price">
 						<strong>Old price:</strong>
-						<span class="old-price">${Math.round(product.price)} zł</span>
+						<span class="old-price">${Math.round(price)} zł</span>
 					</p>`
 								: ''
 						}
-						<p><strong>Color:</strong> ${product.color}</p>
+						<p><strong>Color:</strong> ${color}</p>
 						<p class="product-description">
-							<strong>Description:</strong> ${product.description}
+							<strong>Description:</strong> ${description}
 						</p>
-						${product.size ? `<p class="product-size"><strong>Size:</strong> M</p>` : ''}
-						<p class="product-weight"><strong>Weight:</strong> ${product.weight} kg</p>
+						${size ? `<p class="product-size"><strong>Size:</strong> ${size}</p>` : ''}
+						<p class="product-weight"><strong>Weight:</strong> ${weight} kg</p>
 					</div>`
-		})
+			}
+		)
 		.join('')
 
 	productsContainer.innerHTML = productsHTML
@@ -95,7 +118,7 @@ setTimeout(() => {
 
 searchBtn.addEventListener('click', performSearch)
 
-searchInput.addEventListener('keyup', (event) => {
+searchInput.addEventListener('keyup', event => {
 	if (event.key === 'Enter') {
 		performSearch()
 	}
@@ -103,7 +126,7 @@ searchInput.addEventListener('keyup', (event) => {
 
 function performSearch() {
 	const searchQuery = searchInput.value.toLowerCase().trim()
-	const foundProducts = discountedProducts.filter((product) =>
+	const foundProducts = discountedProducts.filter(product =>
 		product.name.toLowerCase().includes(searchQuery)
 	)
 
