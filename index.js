@@ -38,9 +38,15 @@ const discountedProducts = sortedProducts.map(product => {
 	}
 })
 
-function renderProduct() {
-	const productsHTML = discountedProducts.map(product => {
-		return `
+function renderProducts(discountedProducts) {
+	if (discountedProducts.length === 0) {
+		productsContainer.innerHTML = '<p class="message">No products found</p>'
+		return
+	}
+
+	const productsHTML = discountedProducts
+		.map(product => {
+			return `
 		<div class="product">
 						<h2>${product.name}</h2>
 						<p><strong>Brand:</strong> ${product.brand}</p>
@@ -64,9 +70,10 @@ function renderProduct() {
 						${product.size ? `<p class="product-size"><strong>Size:</strong> M</p>` : ''}
 						<p class="product-weight"><strong>Weight:</strong> ${product.weight} kg</p>
 					</div>`
-	})
+		})
+		.join('')
 
-	productsContainer.innerHTML = productsHTML.join('')
+	productsContainer.innerHTML = productsHTML
 }
 
 function showLoader() {
@@ -82,59 +89,28 @@ function hideLoader() {
 showLoader()
 
 setTimeout(() => {
-	renderProduct()
+	renderProducts(discountedProducts)
 	hideLoader()
 }, 2000)
 
-function performSearch() {
-	const searchQuery = searchInput.value.toLowerCase()
+searchBtn.addEventListener('click', performSearch)
 
-	if (!searchQuery.trim()) {
-		renderProduct()
-		return
+searchInput.addEventListener('keyup', (event) => {
+	if (event.key === 'Enter') {
+		performSearch()
 	}
+})
 
-	const filteredProducts = discountedProducts.filter(
-		product =>
-			product.name.toLowerCase().includes(searchQuery) ||
-			product.brand.toLowerCase().includes(searchQuery) ||
-			product.description.toLowerCase().includes(searchQuery)
+function performSearch() {
+	const searchQuery = searchInput.value.toLowerCase().trim()
+	const foundProducts = discountedProducts.filter((product) =>
+		product.name.toLowerCase().includes(searchQuery)
 	)
 
-	renderFilteredProducts(filteredProducts)
+	showLoader()
+
+	setTimeout(() => {
+		renderProducts(foundProducts)
+		hideLoader()
+	}, 2000)
 }
-
-function renderFilteredProducts(products) {
-	const productsHTML = products.map(product => {
-		return `
-		<div class="product">
-						<h2>${product.name}</h2>
-						<p><strong>Brand:</strong> ${product.brand}</p>
-						<img src="./img/${product.img}" alt="${product.name}" />
-						<p class="product-price">
-							<strong>Price:</strong>
-							<span class="new-price">${Math.round(product.newPrice)} zł</span>
-						</p>
-						${
-							product.price !== product.newPrice
-								? `<p class="product-old-price">
-						<strong>Old price:</strong>
-						<span class="old-price">${Math.round(product.price)} zł</span>
-					</p>`
-								: ''
-						}
-						<p><strong>Color:</strong> ${product.color}</p>
-						<p class="product-description">
-							<strong>Description:</strong> ${product.description}
-						</p>
-						${product.size ? `<p class="product-size"><strong>Size:</strong> M</p>` : ''}
-						<p class="product-weight"><strong>Weight:</strong> ${product.weight} kg</p>
-					</div>`
-	})
-
-	productsContainer.innerHTML = productsHTML.join('')
-}
-
-// Додаємо обробники подій для пошуку
-searchInput.addEventListener('input', performSearch)
-searchBtn.addEventListener('click', performSearch)
